@@ -7,37 +7,32 @@ class dataset_explorer:
         if 'ezHDF' not in dataset.attrs.keys():
             raise TypeError('not an ezHDF dataset !')
         self.dataset = dataset
+        attrs = self.dataset.attrs
         self.column_names = [name.decode('utf-8') for name in dataset.attrs['column_names']] 
+        self.column_dtype = attrs['column_dtype'].split(',')
+        self.n_rows = attrs['n_rows']
+        self.container_size = attrs['container_size']
 
     def __str__(self):
         attrs = self.dataset.attrs
         output = 'ezHDF hanlder object:\n'+\
                  '  dataset name: %s\n' % attrs['name']+\
                  '  column names: \n'+\
-                 '  ['+' , '.join([ name.decode('utf-8') for name in attrs['column_names']])+']\n'+\
+                 '  ['+' , '.join(self.column_names)+']\n'+\
                  '  column dtype:\n'+\
-                 '  ['+attrs['column_dtype']+']\n'+\
-                 '  size of data: %d\n' % attrs['n_rows']+\
-                 '  size of container %d' % attrs['container_size']
+                 '  ['+' , '.join(self.column_dtype)+']\n'+\
+                 '  size of data: %d\n' % self.n_rows+\
+                 '  size of container %d' % self.container_size
         return output
-
-    def __getattr__(self, item):
-        attrs = self.dataset.attrs
-        if item == 'name' or item =='n_rows' or item == 'container_size':
-            return attrs[item]
-        elif item == 'column_names':
-            return [ name.decode('utf-8') for name in attrs['column_names']]
 
     def __getitem__(self, item):
         item1, item2 = item
-        attrs = self.dataset.attrs
-        column_names = [ name.decode('utf-8') for name in attrs['column_names']]
 
         # convert item2 to a list of column names
         if type(item2) != type([0]):
             item2 = [item2]
         if type(item2[0]) == type(0):
-            item2 = [column_names[idx] for idx in item2]
+            item2 = [self.column_names[idx] for idx in item2]
             
         for n, col in enumerate(item2):
             df_tmp = pd.DataFrame(self.dataset[col][item1], columns = [col])
@@ -77,7 +72,7 @@ class hdf_store:
             print('dataset name: %s' % ds_name)
             print('column names:')
             print('  ',[ name.decode('utf-8') for name in ds.attrs['column_names']])
-            print('column dtype: %s' % ds.attrs['column_dtype'])
+            print('column dtype:[ %s ]' % ds.attrs['column_dtype'])
             print('n_rows: %d' % ds.attrs['n_rows'])
             print('n_container: %d\n' % ds.attrs['container_size'])
 
@@ -88,33 +83,33 @@ class hdf_store:
         ds.attrs['container_size'] = new_n_rows        
         print('dataset (%s) now resized to (%d) rows' % (ds_name, new_n_rows))
 
-    def append_to_dataset(self, ds_name, chunk):
+    def append(self, ds_name, data):
         ds = self.h5f[ds_name]
-        if type(chunk) != type(pd.DataFrame([])):
-            raise TypeError('You can only append a pandas DataFrame. Found:', type(chunk))
-        if chunk.shape[1] != len(ds.attrs['column_names']):
+        if type(data) != type(pd.DataFrame([])):
+            raise TypeError('You can only append a pandas DataFrame. Found:', type(data))
+        if data.shape[1] != len(ds.attrs['column_names']):
             raise ValueError('found chunk with %d columns but dataset has only %d.' 
-                            % ( chunk.shape[1], len(ds.attrs['column_names'])),  
+                            % ( data.shape[1], len(ds.attrs['column_names'])),  
                             'check if row index is included. If so, use ' 
                             'chunk.drop(chunk.columns[0], axis = 1) to drop it before ' 
-                            'using append_to_dataset.' 
+                            'using hdf_store.append.' 
                             )
 
         # check if resize dataset
         n_rows = ds.attrs['n_rows']
         container_size = ds.attrs['container_size']
-        if n_rows+len(chunk) > container_size: 
-            print(' auto resizing dataset to: %d' % ( n_rows + len(chunk)))
+        if n_rows+len(data) > container_size: 
+            print(' auto resizing dataset to: %d' % ( n_rows + len(data)))
 
         for n, name in enumerate(ds.attrs['column_names']):
             name = name.decode('utf-8')
-            if n_rows+len(chunk) > container_size: 
-                ds.resize((n_rows+len(chunk),))
-            ds[name][n_rows:n_rows+len(chunk)] = chunk.iloc[:,n]
+            if n_rows+len(data) > container_size: 
+                ds.resize((n_rows+len(data),))
+            ds[name][n_rows:n_rows+len(data)] = data.iloc[:,n]
 
-        ds.attrs['n_rows'] += len(chunk)
+        ds.attrs['n_rows'] += len(data)
     
-    def auto_match_size(self, ds_name):
+    def auto_resize(self, ds_name):
         ds = self.h5f[ds_name]
         n_rows = ds.attrs['n_rows']
         if n_rows < ds.attrs['container_size']:
@@ -122,7 +117,7 @@ class hdf_store:
         else:
             print(' size is consistent, no adjustment needed.')
 
-    def ds_explorer(self, ds_name):
+    def explorer(self, ds_name):
 
         return dataset_explorer(self.h5f[ds_name])
     

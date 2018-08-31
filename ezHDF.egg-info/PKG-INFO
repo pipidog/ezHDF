@@ -1,12 +1,12 @@
 Metadata-Version: 1.1
 Name: ezHDF
-Version: 0.1
+Version: 0.1.1
 Summary: A convenient toolbox to store and read huge amount of data using pandas and HDF5
 Home-page: https://github.com/pipidog/ezHDF
 Author: pipidog
 Author-email: pipidog@gmail.com
 License: MIT
-Download-URL: https://github.com/pipidog/ezHDF/archive/v.0.1.tar.gz
+Download-URL: https://github.com/pipidog/ezHDF/archive/v.0.1.1.tar.gz
 Description: # Welcome to ezHDF
         ## What is ezHDF5
         ezHDF is a simple tool you help you use HDF5 in combination with pandas to store and read hugh amount of data.

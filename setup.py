@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
-version='0.1'
-with open('/Users/shutingpi/Dropbox/ezHDF/README.md') as file:
+version='0.1.1'
+with open('README.md') as file:
     long_description = file.read()
 
 setup(
