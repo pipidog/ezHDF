@@ -1,0 +1,9 @@
+README.md
+setup.py
+ezHDF/__init__.py
+ezHDF/ezHDF.py
+ezHDF.egg-info/PKG-INFO
+ezHDF.egg-info/SOURCES.txt
+ezHDF.egg-info/dependency_links.txt
+ezHDF.egg-info/requires.txt
+ezHDF.egg-info/top_level.txt
