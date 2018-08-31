@@ -1,14 +1,13 @@
 from setuptools import setup, find_packages
-version='0.1.1'
-with open('README.md') as file:
-    long_description = file.read()
+version='0.1.4'
+#with open('D:/Clouds/Dropbox/ezHDF/README.md') as file:
+#    long_description = file.read()
 
 setup(
     name = 'ezHDF',
     version = version,
     packages = ['ezHDF'],
     description = 'A convenient toolbox to store and read huge amount of data using pandas and HDF5',
-    long_description=long_description,
     scripts = [],
     license='MIT',
     author = 'pipidog',
