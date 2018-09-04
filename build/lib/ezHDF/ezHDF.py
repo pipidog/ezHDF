@@ -2,7 +2,7 @@ import h5py
 import numpy as np 
 import pandas as pd
 
-class dataset_explorer:
+class DataExplorer:
     def __init__(self, dataset):
         if 'ezHDF' not in dataset.attrs.keys():
             raise TypeError('not an ezHDF dataset !')
@@ -12,7 +12,8 @@ class dataset_explorer:
         self.column_dtype = attrs['column_dtype'].split(',')
         self.n_rows = attrs['n_rows']
         self.container_size = attrs['container_size']
-
+        self.shape = (attrs['n_rows'], len(self.column_names))
+        
     def __str__(self):
         attrs = self.dataset.attrs
         output = 'ezHDF hanlder object:\n'+\
@@ -33,17 +34,47 @@ class dataset_explorer:
             item2 = [item2]
         if type(item2[0]) == type(0):
             item2 = [self.column_names[idx] for idx in item2]
-            
+
+        df = pd.DataFrame([])    
         for n, col in enumerate(item2):
             df_tmp = pd.DataFrame(self.dataset[col][item1], columns = [col])
-            if n == 0:
-                df = df_tmp
-            else:
-                df = pd.concat([df,df_tmp], axis = 1)
+            df = pd.concat([df,df_tmp], axis = 1)
                 
         return df
 
-class hdf_store:
+    def _concat_col(self, init_idx, batch_size):
+        df = pd.DataFrame([])
+        # concate all columns
+        for col in self.column_names:
+            if init_idx+batch_size <= self.n_rows:
+                df_tmp = pd.DataFrame(self.dataset[col][init_idx:init_idx+batch_size], columns = [col])
+            else:
+                df_tmp = pd.DataFrame(self.dataset[col][init_idx:], columns = [col])
+            df = pd.concat([df, df_tmp], axis = 1)
+        return df
+    
+    def batch(self, batch_size):
+        init_idx_list = np.arange(0,self.n_rows,batch_size)
+        for init_idx in init_idx_list:
+            df = self._concat_col(init_idx, batch_size)
+            yield df
+    
+    def random_batch(self, mini_batch_size, n_mini_batch):
+        '''
+        mini_batch_size: rows of a ordered mini_batch
+        n_mini_batch: number of mini_batch per batch
+        '''
+        init_idx_list = np.arange(0, self.n_rows, mini_batch_size)
+        np.random.shuffle(init_idx_list)
+
+        df = pd.DataFrame([])
+        for n, init_idx in enumerate(init_idx_list):
+            if (n%n_mini_batch == 0) and (n!=0):
+                yield df.sample(frac=1).reset_index(drop=True)
+                df = pd.DataFrame([])            
+            df = pd.concat([df, self._concat_col(init_idx, mini_batch_size)], axis = 0)
+
+class ezHDF:
     def __init__(self, wkdir = './', hdf_name = 'data.h5', mode ='a'):
         if wkdir[-1]!='/' and wkdir[-1]!='\\':
             wkdir +='/' 
@@ -119,7 +150,7 @@ class hdf_store:
 
     def explorer(self, ds_name):
 
-        return dataset_explorer(self.h5f[ds_name])
+        return DataExplorer(self.h5f[ds_name])
     
     def close(self):
         self.h5f.close()
