@@ -33,9 +33,9 @@ very fast ! isn't it?
 Note that, the term "dataset" in ezHDF is different from the term "dataset" in h5py. Since ezHDF use a group in h5py to store all columns in Pandas, there is no "group" in ezHDF. 
 
 There are two Jupyter files in the examples folder:  
-* ex_store_data.ipynb: this file shows how to store huge amout of data using ezHDF
+* [ex_store_data.ipynb](https://github.com/pipidog/ezHDF/blob/master/example/ex_store_data.ipynb): this file shows how to store huge amout of data using ezHDF
 
-* ex_explore_data.ipynb: this file shows how to explore a ezHDF file using it built API. 
+* [ex_explore_data.ipynb](https://github.com/pipidog/ezHDF/blob/master/example/ex_explore_data.ipynb): this file shows how to explore a ezHDF file using it built API. 
 
 If you want to generate your own test dataset, you can use the file **generate_random_data.py** to generate your own test dataset. 
 
@@ -50,12 +50,12 @@ Consider we have a dataset like this:
 </p>
 There 6 columns with types string, integer, ..., etc. Their column names are 'int1', 'float2', ..., etc. If you want to store the data, follow the stpes:
 <p align="center">
-    <img src="./img/store_data.png">
+    <img src="./img/data_store.png">
 </p>
 
 If a file is stored using ezHDF, you can also explore the data using ezHDF's built API:
 <p align="center">
-    <img src="./img/explore_data.png">
+    <img src="./img/data_explore.png">
 </p>
 
 ## More Advanced Use
