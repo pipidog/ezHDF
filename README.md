@@ -49,14 +49,97 @@ Consider we have a dataset like this:
     <img src="./img/data.png">
 </p>
 There 6 columns with types string, integer, ..., etc. Their column names are 'int1', 'float2', ..., etc. If you want to store the data, follow the stpes:
-<p align="center">
-    <img src="./img/data_store.png">
-</p>
 
-If a file is stored using ezHDF, you can also explore the data using ezHDF's built API:
-<p align="center">
+``` python
+from ezHDF.ezHDF import exHDF
+import pandas as pd
+
+# If your data is huge, you should consider read the file using a pandas chunk reader
+reader = pd.read_csv('/myfolder/data1.csv', sep = ',', engine = 'c', 
+                    error_bad_lines=False, warn_bad_lines=False, index_col = False,
+                    chunksize= 100)
+
+# create a hdf_store onject, use mode ='w' to create a new hdf file
+store = ezHDF(wkdir = '/myfolder/', hdf_name = 'my_hdf.h5', mode = 'w')
+
+# let's define the column names and data type of each column
+col_name = ['str0','int1','float2','float3','str4','str5','str6']
+dtype = ['s','i','f','f','s','s','s']
+
+# now create a dateset to store the data. You will need to set an initial container size (number of rows) 
+store.new_dataset(ds_name = 'data1', container_size = 12000, column_names = col_name, column_dtype = dtype)
+
+# put data1 into dataset data1
+for chunk in reader:
+    chunk = chunk.drop(chunk.columns[0], axis = 1) # drop index column
+    store.append(ds_name = 'data1', data = chunk)
+
+# check status 
+store.info()
+
+# close the file
+store.close()
+```
+
+<!-- <p align="center">
+    <img src="./img/data_store.png">
+</p> -->
+
+
+If a file is stored using ezHDF, you can also explore the data using ezHDF's built API:    
+
+```python
+
+from ezHDF.ezHDF import ezHDF
+
+# create a hdf_store object, use mode ='r' to read a hdf file
+store = ezHDF(wkdir = '/myfolder/', hdf_name = 'my_hdf.h5', mode = 'r')
+
+# create a ezHDF data explorer 
+ds = store.explorer(ds_name = 'data1')
+
+# you can check basic informatin of the dataset by using "print"
+print(ds)
+
+# you can slice your data using column names:
+df = ds[0:5,'str0']
+# or a list of column names:
+df = ds[0:5,['str0','float2','str5']]
+# or numeric index of the columns:
+df = ds[0:5,2]
+# or a list of numeric index of the columns
+df = ds[0:5, [0,2,4,6]]
+
+# get a batch by for loop
+data_generator = ds.batch(batch_size = 256)
+for data in data_generator:
+    print(data.shape)
+
+# get a batch by __next__() method
+data_generator = ds.batch(batch_size = 10)
+print(data_generator.__next__())
+
+# get a random batch by for loop 
+random_data_generator = ds.random_batch(mini_batch_size = 32, n_mini_batch = 5)
+for data in random_data_generator:
+    print(data.shape)
+
+# get a random batch by __next__() method
+random_data_generator = ds.random_batch(mini_batch_size = 32, n_mini_batch = 5)
+print(random_data_generator.__next__())
+
+# you can also reset your random number generator. This will guarantee you get exact the same random batch. If you have two different datasets with the same number of rows and you want to get the random batch by exactly way (i.e. fetch the same rows for every batch), you can also use set reset_seed = True.   
+random_data_generator = ds.random_batch(mini_batch_size = 32, n_mini_batch = 5, reset_seed = True)
+```
+
+<!-- <p align="center">
     <img src="./img/data_explore.png">
-</p>
+</p> -->
 
 ## More Advanced Use
-ezHDF is just an API of h5py. Therefore, you can absolute h5py or any other HDF5 tools to explore the file. 
+ezHDF is just an API of h5py. Therefore, you can absolute h5py or any other HDF5 tools to explore the file. To get the h5py File object, simply use the .h5f attribute, e.g:
+```python
+store = ezHDF('myfile','r')
+# the following object is identical to h5f = h5py.File('myfile','r')
+store.h5f
+```

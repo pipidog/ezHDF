@@ -59,13 +59,16 @@ class DataExplorer:
             df = self._concat_col(init_idx, batch_size)
             yield df
     
-    def random_batch(self, mini_batch_size, n_mini_batch):
+    def random_batch(self, mini_batch_size, n_mini_batch, reset_seed = False):
         '''
         mini_batch_size: rows of a ordered mini_batch
         n_mini_batch: number of mini_batch per batch
         '''
-        init_idx_list = np.arange(0, self.n_rows, mini_batch_size)
-        np.random.shuffle(init_idx_list)
+
+        if reset_seed:
+            np.random.seed(0)
+            
+        init_idx_list = np.random.permutation(np.arange(0, self.n_rows, mini_batch_size))
 
         df = pd.DataFrame([])
         for n, init_idx in enumerate(init_idx_list):
