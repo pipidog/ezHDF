@@ -151,6 +151,10 @@ class ezHDF:
         else:
             print(' size is consistent, no adjustment needed.')
 
+    def get_dataset_list(self):
+
+        return list(self.h5f.keys())
+
     def explorer(self, ds_name):
 
         return DataExplorer(self.h5f[ds_name])
