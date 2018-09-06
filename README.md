@@ -128,7 +128,12 @@ for data in random_data_generator:
 random_data_generator = ds.random_batch(mini_batch_size = 32, n_mini_batch = 5)
 print(random_data_generator.__next__())
 
-# you can also reset your random number generator. This will guarantee you get exact the same random batch. If you have two different datasets with the same number of rows and you want to get the random batch by exactly way (i.e. fetch the same rows for every batch), you can also use set reset_seed = True.   
+'''
+you can also reset your random number generator. This will guarantee you get exact 
+the same random batch. If you have two different datasets with the same number of 
+rows and you want to get the random batch by exactly way (i.e. fetch the same rows 
+for every batch), you can also use set reset_seed = True.   
+'''
 random_data_generator = ds.random_batch(mini_batch_size = 32, n_mini_batch = 5, reset_seed = True)
 ```
 
