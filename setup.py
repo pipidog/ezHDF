@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-version='0.2.3'
+version='0.2.4'
 #with open('D:/Clouds/Dropbox/ezHDF/README.md') as file:
 #    long_description = file.read()
 
