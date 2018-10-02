@@ -74,6 +74,9 @@ for chunk in reader:
     chunk = chunk.drop(chunk.columns[0], axis = 1) # drop index column
     store.append(ds_name = 'data1', data = chunk)
 
+# get dataset list
+store.get_dataset_list()
+
 # check status 
 store.info()
 
@@ -143,3 +146,42 @@ store = ezHDF('myfile','r')
 # the following object is identical to h5f = h5py.File('myfile','r')
 store.h5f
 ```
+
+# APIs
+## ezHDF
+* **h5f**:  
+the h5py object. If you want handle your data using naive h5py, simply use this attribute. 
+* **new_dataset(ds_name, container_size, column_names, column_dtype)**  
+create a new dataset 
+* **info()**  
+show information about the ezHDF object
+* **resize(ds_name, new_n_rows)**   
+resize a particular dataset
+* **append(ds_name, data)**    
+append data to a particular dataset
+* **auto_resize(ds_name)**  
+auto resize a dataset to match current data size
+* **get_dataset_list()**   
+show a list that contains all datasets
+* **explorer(ds_name)**   
+it will return a data explorer object for you to explore a particular dataset
+* **close()**   
+close a file
+
+## data_explorer:
+* **dataset**   
+name of the dataset
+* **column_names**  
+column_names of the dataset
+* **column_dtype**   
+data type of each column
+* **n_rows**  
+number of rows of the dataset 
+* **shape**   
+the shape of the dataset
+* **batch(batch_size)**   
+it will return a data generator 
+* **random_batch(mini_batch_size, n_mini_batch, set_seed = None)**    
+it will return a random data generator. The total rows of each batch is mini_batch_size*n_mini_batch. Use set_seed to control the randomness. 
+
+

@@ -64,9 +64,7 @@ class DataExplorer:
         mini_batch_size: rows of a ordered mini_batch
         n_mini_batch: number of mini_batch per batch
         '''
-        if type(set_seed) != type(0):
-            raise TypeError('set_seed must be an integer')
-             
+
         if set_seed != None:
             np.random.seed(set_seed)
             
@@ -78,6 +76,7 @@ class DataExplorer:
                 yield df.sample(frac=1).reset_index(drop=True)
                 df = pd.DataFrame([])            
             df = pd.concat([df, self._concat_col(init_idx, mini_batch_size)], axis = 0)
+        yield df.sample(frac=1).reset_index(drop=True)
 
 class ezHDF:
     def __init__(self, wkdir = './', hdf_name = 'data.h5', mode ='a'):
@@ -99,7 +98,7 @@ class ezHDF:
             else:
                 typ = column_dtype[n]
             ds.create_dataset(col, (container_size,), maxshape =(None,), dtype = typ) 
-        ds.attrs['column_dtype'] = ' , '.join(column_dtype)
+        ds.attrs['column_dtype'] = ','.join(column_dtype)
 
     def info(self):
         print('\n--- ezHDF hdf_store info ---\n')
@@ -124,7 +123,7 @@ class ezHDF:
         if type(data) != type(pd.DataFrame([])):
             raise TypeError('You can only append a pandas DataFrame. Found:', type(data))
         if data.shape[1] != len(ds.attrs['column_names']):
-            raise ValueError('found chunk with %d columns but dataset has only %d.' 
+            raise ValueError('found data with %d columns but dataset has %d.' 
                             % ( data.shape[1], len(ds.attrs['column_names'])),  
                             'check if row index is included. If so, use ' 
                             'chunk.drop(chunk.columns[0], axis = 1) to drop it before ' 
